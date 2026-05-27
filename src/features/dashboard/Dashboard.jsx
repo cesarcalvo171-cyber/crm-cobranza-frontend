@@ -170,13 +170,13 @@ export function Dashboard() {
         })}
       </div>
 
-      {/* Widget Informativo Adicional */}
+      {/* Widget Informativo Adicional
       <div className="bg-white dark:bg-slate-900/10 backdrop-blur-md border border-slate-200 dark:border-slate-900 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">Conexión con Supabase</h3>
         <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
           Las métricas mostradas en este panel provienen directamente de las tablas relacionales de tu base de datos Supabase en vivo. Al usar consultas directas y declarativas sincronizadas mediante React Query, garantizas un rendimiento óptimo e información instantánea sin necesidad de alterar tu pasarela de pagos ni los controladores REST de tu servidor Express.
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

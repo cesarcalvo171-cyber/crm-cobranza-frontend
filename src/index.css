@@ -16,45 +16,45 @@
    ============================================================ */
 @layer base {
   :root {
-    /* Fondos */
-    --background:   0 0% 98%;
-    --foreground:   240 10% 4%;
+    /* Fondos — Un tono pizarra suave, moderno y descansado para la vista */
+    --background:   215 20% 97%;
+    --foreground:   222 47% 11%;
 
-    /* Tarjetas */
+    /* Tarjetas — Blanco puro para resaltar sobre el fondo pizarra */
     --card:            0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card-foreground: 222 47% 11%;
 
     /* Popovers y dropdowns */
     --popover:            0 0% 100%;
-    --popover-foreground: 240 10% 4%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Acción primaria — mapea a brand-500 (#6e40ff) */
-    --primary:            262 100% 62%;
-    --primary-foreground: 0 0% 100%;
+    /* Acción primaria — Un índigo vibrante pero amigable */
+    --primary:            250 84% 54%;
+    --primary-foreground: 210 40% 98%;
 
     /* Acción secundaria */
-    --secondary:            240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
+    --secondary:            210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
 
     /* Texto y fondos amortiguados */
-    --muted:            240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted:            210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
     /* Elemento de énfasis/hover */
-    --accent:            262 100% 97%;
-    --accent-foreground: 262 100% 35%;
+    --accent:            250 84% 97%;
+    --accent-foreground: 250 84% 40%;
 
     /* Errores y acciones destructivas */
-    --destructive:            0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive:            346 84% 61%;
+    --destructive-foreground: 210 40% 98%;
 
-    /* Bordes e inputs */
-    --border: 240 6% 90%;
-    --input:  240 6% 90%;
-    --ring:   262 100% 62%;
+    /* Bordes e inputs — Bordes súper limpios y sutiles */
+    --border: 214.3 31.8% 91.4%;
+    --input:  214.3 31.8% 91.4%;
+    --ring:   250 84% 54%;
 
     /* Radio de bordes base */
-    --radius: 0.625rem;
+    --radius: 0.75rem;
   }
 
   .dark {

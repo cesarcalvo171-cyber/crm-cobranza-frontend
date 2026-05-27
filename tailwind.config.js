@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   // Modo oscuro vía clase .dark (requerido por shadcn/ui)
-  darkMode: ["class"],
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

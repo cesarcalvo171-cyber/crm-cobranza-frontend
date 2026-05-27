@@ -31,6 +31,9 @@ export default {
           900: '#350aa3',
           950: '#1f046e',
         },
+        // ── Colores faltantes agregados en Sprint 3 ─────────────────────────
+        'indigo-650': '#4338ca',
+        'slate-850': '#1a2234',
         // ── Tokens semánticos de shadcn/ui (via CSS variables) ──────────────
         border:      "hsl(var(--border))",
         input:       "hsl(var(--input))",

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { useContactsList, useContactMutations } from '../hooks/useContacts';
 import { ContactsTable } from '../components/table/ContactsTable';
 import { ContactsFilters } from '../components/filters/ContactsFilters';
@@ -13,6 +14,10 @@ export function ContactsPage() {
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+
+  // Debounce: espera 350ms tras el último keystroke antes de disparar la query
+  // Reduce requests al servidor de N (uno por tecla) a 1 (tras pausa de escritura)
+  const debouncedSearch = useDebounce(search, 350);
 
   // Estados de Modales y Diálogos
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -30,10 +35,11 @@ export function ContactsPage() {
   };
 
   // 1. Hook de Obtención de Listado de Contactos (React Query)
+  // IMPORTANTE: usa debouncedSearch (no search) para evitar un request por keystroke
   const { data, isLoading, isError, error, refetch } = useContactsList({
     page,
     limit,
-    search,
+    search: debouncedSearch,
     status
   });
 
@@ -196,28 +202,30 @@ export function ContactsPage() {
           />
 
           {/* Controles de Paginación */}
-          {pagination.totalPages > 1 && (
+          {pagination.total > 0 && (
             <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-900 pt-4 px-2">
               <span className="text-[11px] font-semibold text-slate-500 select-none">
-                Página {pagination.page} de {pagination.totalPages} ({pagination.total} clientes totales)
+                Página {pagination.page} de {Math.max(1, pagination.totalPages)} ({pagination.total} clientes totales)
               </span>
 
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={pagination.page <= 1}
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="p-1.5 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-850 dark:hover:text-slate-200 rounded-lg disabled:opacity-40 transition-all select-none"
-                >
-                  <ChevronLeft className="w-4.5 h-4.5" />
-                </button>
-                <button
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-                  className="p-1.5 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-850 dark:hover:text-slate-200 rounded-lg disabled:opacity-40 transition-all select-none"
-                >
-                  <ChevronRight className="w-4.5 h-4.5" />
-                </button>
-              </div>
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={pagination.page <= 1}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    className="p-1.5 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-850 dark:hover:text-slate-200 rounded-lg disabled:opacity-40 transition-all select-none"
+                  >
+                    <ChevronLeft className="w-4.5 h-4.5" />
+                  </button>
+                  <button
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                    className="p-1.5 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-850 dark:hover:text-slate-200 rounded-lg disabled:opacity-40 transition-all select-none"
+                  >
+                    <ChevronRight className="w-4.5 h-4.5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

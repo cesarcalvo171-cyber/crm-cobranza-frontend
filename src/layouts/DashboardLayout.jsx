@@ -91,7 +91,7 @@ export function DashboardLayout() {
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/15'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/60 border border-transparent'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900/60 border border-transparent'
                   }`
                 }
               >
@@ -163,7 +163,7 @@ export function DashboardLayout() {
                       }`
                     }
                   >
-                    <Icon className="w-4.5 h-4.5" />a
+                    <Icon className="w-4.5 h-4.5" />
                     <span>{item.name}</span>
                   </NavLink>
                 );

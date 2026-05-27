@@ -1,12 +1,76 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 
 export function ConfirmDeleteDialog({ isOpen, onClose, contact, onConfirm, isDeleting }) {
+  const dialogRef = useRef(null);
+
+  // Focus Trap + Escape key close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const activeElementBeforeDialog = document.activeElement;
+
+    const handleKeyDown = (e) => {
+      // Escape close
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Focus Trap
+      if (e.key === 'Tab') {
+        if (!dialogRef.current) return;
+        const focusableElements = dialogRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          // Tab backwards
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          // Tab forwards
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Autofocus on Cancel button for safety (destructive action prevention)
+    setTimeout(() => {
+      if (dialogRef.current) {
+        const cancelButton = dialogRef.current.querySelector('button');
+        if (cancelButton) cancelButton.focus();
+      }
+    }, 100);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (activeElementBeforeDialog && typeof activeElementBeforeDialog.focus === 'function') {
+        activeElementBeforeDialog.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !contact) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+      aria-modal="true"
+      role="dialog"
+    >
       <div 
+        ref={dialogRef}
         className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 relative overflow-hidden animate-slide-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -25,6 +89,7 @@ export function ConfirmDeleteDialog({ isOpen, onClose, contact, onConfirm, isDel
           </div>
           <button 
             onClick={onClose}
+            aria-label="Cerrar modal de eliminación"
             className="p-1 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg"
           >
             <X className="w-4 h-4" />

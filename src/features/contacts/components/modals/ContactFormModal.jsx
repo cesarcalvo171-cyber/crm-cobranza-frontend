@@ -1,12 +1,71 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { contactValidationSchema } from '../../validations/contacts';
 import { X, Loader2, Sparkles, UserCheck, ShieldAlert } from 'lucide-react';
 
 export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitting }) {
-  if (!isOpen) return null;
+  const modalRef = useRef(null);
+  const initialInputRef = useRef(null);
 
   const isEdit = !!contact;
+
+  // 1. Cierre con tecla Escape + Focus Trap
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Guardar elemento enfocado anteriormente para restaurar al cerrar
+    const activeElementBeforeModal = document.activeElement;
+
+    const handleKeyDown = (e) => {
+      // Cierre con Escape
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Focus Trap en Tab
+      if (e.key === 'Tab') {
+        if (!modalRef.current) return;
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          // Tab hacia atrás
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          // Tab hacia adelante
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Autofocus inteligente al abrir
+    setTimeout(() => {
+      if (initialInputRef.current) {
+        initialInputRef.current.focus();
+      }
+    }, 100);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (activeElementBeforeModal && typeof activeElementBeforeModal.focus === 'function') {
+        activeElementBeforeModal.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   const initialValues = {
     customer_number: contact?.customer_number || '',
@@ -29,8 +88,14 @@ export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitt
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+      aria-modal="true"
+      role="dialog"
+    >
       <div 
+        ref={modalRef}
         className="w-full max-w-lg bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 relative overflow-hidden animate-slide-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -54,6 +119,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitt
           </div>
           <button 
             onClick={onClose}
+            aria-label="Cerrar modal"
             className="p-1.5 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-850 rounded-lg transition-all"
           >
             <X className="w-4 h-4" />
@@ -67,8 +133,6 @@ export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitt
           onSubmit={handleFormikSubmit}
         >
           {({ errors, touched, isSubmitting: formikSubmitting }) => {
-            const hasPhoneError = errors[''] && touched.whatsapp_number && touched.sms_number;
-            
             return (
               <Form className="space-y-4">
                 {/* Alerta general si Yup valida que falte al menos un teléfono */}
@@ -91,6 +155,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitt
                       id="customer_number"
                       placeholder="CLI-1004"
                       disabled={isEdit} // No permitir editar la clave única del cliente
+                      innerRef={isEdit ? null : initialInputRef}
                       className={`w-full bg-slate-50 dark:bg-slate-950 border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-700 rounded-xl py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all ${
                         isEdit ? 'opacity-50 cursor-not-allowed border-slate-200 dark:border-slate-800' : 
                         errors.customer_number && touched.customer_number
@@ -130,6 +195,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSubmit, isSubmitt
                     type="text"
                     id="name"
                     placeholder="Alejandro Fernández"
+                    innerRef={isEdit ? initialInputRef : null}
                     className={`w-full bg-slate-50 dark:bg-slate-950 border text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-700 rounded-xl py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all ${
                       errors.name && touched.name
                         ? 'border-rose-500 focus:ring-rose-500'

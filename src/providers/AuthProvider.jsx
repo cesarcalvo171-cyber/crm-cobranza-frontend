@@ -1,5 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { initTokenCache, clearTokenCache } from '../api/client';
+
+/**
+ * AuthProvider — v4C Estabilizado
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Mejoras vs versión anterior:
+ *   - Previene race condition sincronizando getSession con el Axios token cache
+ *   - Await a initTokenCache() antes de setear loading: false
+ *   - Limpia de forma segura el cache en logout
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
 
 const AuthContext = createContext({
   session: null,
@@ -14,48 +25,67 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. Obtener sesión inicial al arrancar
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+  // Ref para evitar setState en componentes desmontados
+  const isMountedRef = useRef(true);
 
-    // 2. Suscribirse a cambios en el estado de autenticación (Login, Logout, Token Refresh)
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    // ── 1. Cargar sesión inicial sincronizada con Axios cache ───────────────
+    const loadSession = async () => {
+      try {
+        // Garantizar que Axios token cache ha cargado el token primero
+        await initTokenCache();
+        
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (!isMountedRef.current) return;
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+      } catch (err) {
+        console.error('[AUTH PROVIDER ERROR] Error cargando sesión inicial:', err);
+      } finally {
+        if (isMountedRef.current) {
+          setLoading(false); // ← Cargado garantizado
+        }
+      }
+    };
+
+    loadSession();
+
+    // ── 2. Suscribirse a cambios posteriores (login, logout, refresh) ─────
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+      (_event, currentSession) => {
+        if (!isMountedRef.current) return;
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
       }
     );
 
     return () => {
+      isMountedRef.current = false;
       subscription.unsubscribe();
     };
   }, []);
 
+  // ── Login ─────────────────────────────────────────────────────────────────
+  // No manipula `loading` — el estado de loading de Supabase es manejado por onAuthStateChange
   const login = async (email, password) => {
-    setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) {
-      setLoading(false);
-      throw error;
-    }
+    if (error) throw error;
     return data;
   };
 
+  // ── Logout ───────────────────────────────────────────────────────────────
   const logout = async () => {
-    setLoading(true);
+    // Limpiar cache de Axios antes de llamar a signOut
+    clearTokenCache();
     const { error } = await supabase.auth.signOut();
-    if (error) {
-      setLoading(false);
-      throw error;
-    }
+    if (error) throw error;
   };
 
   const value = {
@@ -68,7 +98,12 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {/*
+        CAMBIO CLAVE: Renderizamos children SIEMPRE (no condicionamos a !loading).
+        ProtectedRoute es quien muestra el spinner durante loading.
+        Esto evita que los providers hijos se desmonten/remonten en cada cambio de sesión.
+      */}
+      {children}
     </AuthContext.Provider>
   );
 }

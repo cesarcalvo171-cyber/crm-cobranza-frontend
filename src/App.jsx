@@ -2,20 +2,27 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppProviders } from './providers/AppProviders';
 import { AppRoutes } from './routes';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 /**
- * Componente Principal de la Aplicación.
- * Inicializa BrowserRouter, carga todos los proveedores globales de contexto,
- * y activa el mapa central de enrutamiento modular.
+ * App — Componente raíz de la aplicación.
+ *
+ * Jerarquía de renderización:
+ *   ErrorBoundary       ← Captura crashes antes de que lleguen al DOM
+ *     BrowserRouter     ← Contexto de routing
+ *       AppProviders    ← Theme, QueryClient, Auth
+ *         AppRoutes     ← Mapa de rutas React Router
  */
 function App() {
   return (
-    <BrowserRouter>
-      <AppProviders>
-        <AppRoutes />
-      </AppProviders>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppProviders>
+          <AppRoutes />
+        </AppProviders>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

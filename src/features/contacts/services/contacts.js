@@ -4,14 +4,14 @@ export const contactsService = {
   /**
    * Obtiene la lista paginada de contactos con búsqueda y filtros
    */
-  async getContacts({ page = 1, limit = 10, search = '', status = '' }) {
+  async getContacts({ page = 1, limit = 10, search = '', status = '' }, signal) {
     const params = new URLSearchParams();
     params.append('page', page);
     params.append('limit', limit);
     if (search.trim()) params.append('search', search.trim());
     if (status) params.append('status', status);
 
-    const { data } = await apiClient.get(`/api/contacts?${params.toString()}`);
+    const { data } = await apiClient.get(`/api/contacts?${params.toString()}`, { signal });
     return data; // Retorna { success, data, pagination, schemaWarning }
   },
 

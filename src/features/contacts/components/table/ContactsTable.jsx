@@ -104,6 +104,7 @@ export function ContactsTable({ contacts, onEditClick, onDeleteClick }) {
                     <button
                       onClick={() => onEditClick(contact)}
                       title="Editar contacto"
+                      aria-label={`Editar contacto ${contact.name}`}
                       className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 rounded-lg transition-all"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -111,6 +112,7 @@ export function ContactsTable({ contacts, onEditClick, onDeleteClick }) {
                     <button
                       onClick={() => onDeleteClick(contact)}
                       title="Dar de baja (Soft Delete)"
+                      aria-label={`Dar de baja contacto ${contact.name}`}
                       className="p-1.5 text-slate-400 hover:text-red-650 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-100 dark:hover:border-red-950 rounded-lg transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
